@@ -1,0 +1,10 @@
+#!/bin/sh
+'''exec' "/home/lukadima/Documents/Cyber Security/Cyber Security and behaviour/Autumn 2026/CyberSecurity  and Behaviour Community Placement INFO3016/DdoS detection and AI analysis - CapStone project ./venv/bin/python3" "$0" "$@"
+' '''
+# -*- coding: utf-8 -*-
+import re
+import sys
+from streamlit.web.cli import main
+if __name__ == '__main__':
+    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+    sys.exit(main())
