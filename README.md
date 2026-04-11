@@ -29,3 +29,18 @@ Generate test traffic samples (attack / normal / mixed)
 Output detection summary and verdict
 
 Export results to CSV
+
+
+--- Features ---
+
+Train ML model using network traffic datasets
+
+Detect attacks via terminal (Linux CLI tool)
+
+Analyze CSV-based traffic logs
+
+Generate test traffic samples (attack / normal / mixed)
+
+Output detection summary and verdict
+
+Export results to CSV
