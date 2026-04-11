@@ -1,6 +1,8 @@
-    ____  ____       _____    ____       __            __  _                                __   ___    ____                     __           _     
-   / __ \/ __ \____ / ___/   / __ \___  / /____  _____/ /_(_)___  ____     ____ _____  ____/ /  /   |  /  _/  ____ _____  ____ _/ /_  _______(_)____
-  / / / / / / / __ \\__ \   / / / / _ \/ __/ _ \/ ___/ __/ / __ \/ __ \   / __ `/ __ \/ __  /  / /| |  / /   / __ `/ __ \/ __ `/ / / / / ___/ / ___/
- / /_/ / /_/ / /_/ /__/ /  / /_/ /  __/ /_/  __/ /__/ /_/ / /_/ / / / /  / /_/ / / / / /_/ /  / ___ |_/ /   / /_/ / / / / /_/ / / /_/ (__  ) (__  ) 
-/_____/_____/\____/____/  /_____/\___/\__/\___/\___/\__/_/\____/_/ /_/   \__,_/_/ /_/\__,_/  /_/  |_/___/   \__,_/_/ /_/\__,_/_/\__, /____/_/____/  
-                                                                                                                               /____/                                                                                                                                              
+DDoS Detection and AI Analysis 
+
+--- Basic Overview ---
+
+This project is aimed at looking at AI-powered DDoS Detection tool that analyses network traffic and then classifies it as normal or attack using machine learning and running it under Python
+-> Offline dataset analysis 
+-> ClI-based detection tool
+-> Simulated real-time traffic detection, possibly using wireshark packets. (Currently working under it,)
