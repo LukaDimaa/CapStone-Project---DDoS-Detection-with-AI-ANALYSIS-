@@ -18,13 +18,13 @@ MODEL_PATH = "models/ddos_model.pkl"
 FEATURES_PATH = "models/feature_columns.pkl"
 
 if not os.path.exists(MODEL_PATH):
-    print("❌ Model not found. Train model first.")
+    print("------- Model not found. Train model first.-------")
     exit()
 
 model = joblib.load(MODEL_PATH)
 feature_columns = joblib.load(FEATURES_PATH)
 
-print("✅ Model loaded")
+print("------- Model loaded -------")
 
 # ---------------------------
 # LOAD DATA
@@ -76,9 +76,9 @@ print(f"Attack: {attack_count}")
 # ALERT SYSTEM
 # ---------------------------
 if attack_count > 0:
-    print("\n🚨 ALERT: Potential DDoS Attack Detected!")
+    print("\n ------- ALERT: Potential DDoS Attack Detected! -------")
 else:
-    print("\n✅ Traffic looks normal.")
+    print("\n ------- Traffic looks normal. -------")
 
 # Optional: save results
 output_file = "results.csv"
