@@ -7,7 +7,7 @@ venv/
 __pycache__/
 *.pyc
 
-# Large datasets
+# Large datasetsls -
 data/
 
 # VS Code settings
@@ -15,3 +15,6 @@ data/
 
 # Models
 models/
+
+#Output Files
+results.csv
