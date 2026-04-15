@@ -1,7 +1,7 @@
 import pandas as pd
 
 FILE_PATH = "data/raw/final_dataset.csv"
-CHUNK_SIZE = 500000
+CHUNK_SIZE = 50000
 
 attack_sample = None
 normal_sample = None
