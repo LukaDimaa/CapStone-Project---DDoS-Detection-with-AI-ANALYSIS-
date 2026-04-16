@@ -18,3 +18,15 @@ models/
 
 #Output Files
 results.csv
+
+#THINGS ARE GETTING TO BIG
+results.csv
+results_*.csv
+mixed_results.csv
+sample_results.csv
+
+results.csv
+mixed_results.csv
+results_*.csv
+
+    

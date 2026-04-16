@@ -13,9 +13,14 @@ FEATURES_PATH = "models/feature_columns.pkl"
 
 
 def print_banner() -> None:
-    print("=" * 70)
-    print("DDoS Detection and AI Analysis Tool")
-    print("=" * 70)
+    print("=" * 128)
+    print("""
+#       ___  ___       ____     __    __          __  _                          __  ___   ____                 __         _   
+#      / _ \/ _ \___  / __/ ___/ /__ / /____ ____/ /_(_)__  ___    ___ ____  ___/ / / _ | /  _/ ___ ____  ___ _/ /_ _____ (_)__
+#     / // / // / _ \_\ \  / _  / -_) __/ -_) __/ __/ / _ \/ _ \  / _ `/ _ \/ _  / / __ |_/ /  / _ `/ _ \/ _ `/ / // (_-</ (_-<
+#    /____/____/\___/___/  \_,_/\__/\__/\__/\__/\__/_/\___/_//_/  \_,_/_//_/\_,_/ /_/ |_/___/  \_,_/_//_/\_,_/_/\_, /___/_/___/
+#                                                                                                              /___/            """)
+    print("=" * 128)
 
 
 def load_model():
@@ -88,7 +93,7 @@ def process_large_csv(
     verbose: bool,
 ) -> tuple[int, int, int, str | None]:
     if not os.path.exists(file_path):
-        print(f"❌ Input file not found: {file_path}")
+        print(f" Input file not found: {file_path}")
         sys.exit(2)
 
     total_rows = 0
@@ -207,6 +212,25 @@ def print_summary(
 
 
 def main() -> None:
+
+    total_rows, total_normal, total_attack, output_file = process_large_csv(
+    file_path=args.file,
+    model=model,
+    feature_columns=feature_columns,
+    chunk_size=args.chunk_size,
+    row_limit=args.rows,
+    output_file=args.output,
+    verbose=args.verbose,
+    )   
+
+    verdict = print_summary(
+    input_file=args.file,
+    total_rows=total_rows,
+    total_normal=total_normal,
+    total_attack=total_attack,
+    output_file=output_file,
+    )
+
     parser = argparse.ArgumentParser(
         description="AI-powered DDoS detection tool for CSV network traffic data."
     )
@@ -271,7 +295,7 @@ def main() -> None:
 
     if verdict == "NORMAL":
         sys.exit(0)
-    elif verdict in {"LOW RISK", "SUSPICIOUS", "ATTACK DETECTED"}:
+    elif verdict in {"LOW RISK", "SUSPICIOUS", "!!!ATTACK DETECTED!!!"}:
         sys.exit(1)
     else:
         sys.exit(2)
@@ -279,3 +303,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+print(f"chunks processed: {processed_chunks}")
