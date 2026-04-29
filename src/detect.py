@@ -14,7 +14,7 @@ FEATURES_PATH = "models/feature_columns.pkl"
 
 def print_banner() -> None:
     print("=" * 128)
-    print("""
+    print(r"""
 #       ___  ___       ____     __    __          __  _                          __  ___   ____                 __         _   
 #      / _ \/ _ \___  / __/ ___/ /__ / /____ ____/ /_(_)__  ___    ___ ____  ___/ / / _ | /  _/ ___ ____  ___ _/ /_ _____ (_)__
 #     / // / // / _ \_\ \  / _  / -_) __/ -_) __/ __/ / _ \/ _ \  / _ `/ _ \/ _  / / __ |_/ /  / _ `/ _ \/ _ `/ / // (_-</ (_-<
@@ -210,54 +210,39 @@ def print_summary(
 
     return verdict
 
-
 def main() -> None:
-
-    total_rows, total_normal, total_attack, output_file = process_large_csv(
-    file_path=args.file,
-    model=model,
-    feature_columns=feature_columns,
-    chunk_size=args.chunk_size,
-    row_limit=args.rows,
-    output_file=args.output,
-    verbose=args.verbose,
-    )   
-
-    verdict = print_summary(
-    input_file=args.file,
-    total_rows=total_rows,
-    total_normal=total_normal,
-    total_attack=total_attack,
-    output_file=output_file,
-    )
-
     parser = argparse.ArgumentParser(
         description="AI-powered DDoS detection tool for CSV network traffic data."
     )
+
     parser.add_argument(
         "--file",
         type=str,
         required=True,
         help="Path to input CSV file"
     )
+
     parser.add_argument(
         "--rows",
         type=int,
         default=None,
         help="Optional limit on number of rows to process"
     )
+
     parser.add_argument(
         "--chunk-size",
         type=int,
         default=10000,
         help="Number of rows to process per chunk (default: 10000)"
     )
+
     parser.add_argument(
         "--output",
         type=str,
         default=None,
         help="Optional output CSV file path"
     )
+
     parser.add_argument(
         "--verbose",
         action="store_true",
@@ -269,9 +254,11 @@ def main() -> None:
     print_banner()
 
     model, feature_columns = load_model()
+
     print(" Model and feature list loaded")
     print(f" Input file: {args.file}")
     print(f" Chunk size: {args.chunk_size}")
+
     if args.rows is not None:
         print(f" Row limit : {args.rows}")
 
@@ -295,7 +282,7 @@ def main() -> None:
 
     if verdict == "NORMAL":
         sys.exit(0)
-    elif verdict in {"LOW RISK", "SUSPICIOUS", "!!!ATTACK DETECTED!!!"}:
+    elif verdict in {"LOW RISK", "SUSPICIOUS", "ATTACK DETECTED"}:
         sys.exit(1)
     else:
         sys.exit(2)
@@ -304,4 +291,5 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-print(f"chunks processed: {processed_chunks}")
+
+    
