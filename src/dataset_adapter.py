@@ -31,13 +31,19 @@ def adapt_dataset(input_file, output_file):
     if label_col != "Label":
         df.drop(columns=[label_col], inplace=True, errors="ignore")
 
+    if df["Label"].nunique() < 2:
+        print("WARNING: Dataset contains only one class.")
+
     df.to_csv(output_file, index=False)
+
+
+    
 
     print("Saved adapted dataset:", output_file)
     print(df["Label"].value_counts())
 
     if __name__ == "__main__":
-    import argparse
+        import argparse
 
     parser = argparse.ArgumentParser(
         description="Universal dataset adapter for DDoS datasets"
@@ -59,4 +65,3 @@ def adapt_dataset(input_file, output_file):
 
     adapt_dataset(args.input, args.output)
 
-    
