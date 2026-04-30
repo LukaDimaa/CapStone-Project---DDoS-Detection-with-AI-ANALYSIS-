@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 
-FILE_PATH = "data/raw/final_dataset.csv"
+FILE_PATH = "data/raw/cic2019_preprocessed.csv"
 TARGET_PER_CLASS = 25000
 CHUNK_SIZE = 500000
 

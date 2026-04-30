@@ -1,0 +1,37 @@
+import pandas as pd
+
+LABEL_CANDIDATES = ["Label", "Class", "Attack", "Category", "target"]
+
+DROP_COLUMNS = [
+    "Flow_ID", "Flow ID", "Src_IP", "Src IP",
+    "Dst_IP", "Dst IP", "Timestamp", "Unnamed: 0"
+]
+
+def find_label_column(df):
+    for col in LABEL_CANDIDATES:
+        if col in df.columns:
+            return col
+    raise ValueError("No label column found.")
+
+def normalize_label(value):
+    value = str(value).strip().lower()
+    if value in ["benign", "normal", "0"]:
+        return "normal"
+    return "attack"
+
+def adapt_dataset(input_file, output_file):
+    df = pd.read_csv(input_file, low_memory=False)
+
+    label_col = find_label_column(df)
+
+    df["Label"] = df[label_col].apply(normalize_label)
+
+    df.drop(columns=DROP_COLUMNS, inplace=True, errors="ignore")
+
+    if label_col != "Label":
+        df.drop(columns=[label_col], inplace=True, errors="ignore")
+
+    df.to_csv(output_file, index=False)
+
+    print("Saved adapted dataset:", output_file)
+    print(df["Label"].value_counts())
