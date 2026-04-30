@@ -35,3 +35,28 @@ def adapt_dataset(input_file, output_file):
 
     print("Saved adapted dataset:", output_file)
     print(df["Label"].value_counts())
+
+    if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Universal dataset adapter for DDoS datasets"
+    )
+
+    parser.add_argument(
+        "--input",
+        required=True,
+        help="Path to raw input dataset CSV"
+    )
+
+    parser.add_argument(
+        "--output",
+        required=True,
+        help="Path to adapted output CSV"
+    )
+
+    args = parser.parse_args()
+
+    adapt_dataset(args.input, args.output)
+
+    
