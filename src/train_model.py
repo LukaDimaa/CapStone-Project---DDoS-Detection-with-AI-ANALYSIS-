@@ -7,30 +7,46 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 
-FILE_PATH = "data/raw/cic2019_preprocessed.csv"
+FILE_PATH = "data/raw/adapted_cic2019.csv"
 TARGET_PER_CLASS = 25000
 CHUNK_SIZE = 500000
 
 attack_chunks = []
 normal_chunks = []
 
+
+
+
 attack_count = 0
 normal_count = 0
 chunk_index = 0
 
-for chunk in pd.read_csv(FILE_PATH, chunksize=CHUNK_SIZE, low_memory=False):
-    chunk_index += 1
+full_df = pd.read_csv(FILE_PATH, low_memory=False)
+full_df = full_df.sample(frac=1, random_state=42).reset_index(drop=True)
+
+
+
+for start in range(0, len(full_df), CHUNK_SIZE):
+    chunk = full_df.iloc[start:start + CHUNK_SIZE].copy()
+
+    chunk_index = (start // CHUNK_SIZE) + 1
     print(f"\nReading chunk {chunk_index}...")
 
     chunk.columns = chunk.columns.str.strip().str.replace(" ", "_")
 
-    chunk = chunk.drop(columns=["Flow_ID", "Src_IP", "Dst_IP", "Timestamp"], errors="ignore")
+    chunk = chunk.drop(
+        columns=["Flow_ID", "Src_IP", "Dst_IP", "Timestamp"],
+        errors="ignore"
+    )
+
     chunk.replace([np.inf, -np.inf], 0, inplace=True)
     chunk.fillna(0, inplace=True)
 
     chunk["Label"] = chunk["Label"].apply(
-        lambda x: "normal" if str(x).strip().upper() == "BENIGN" else "attack"
+        lambda x: "normal" if str(x).strip().lower() == "normal" else "attack"
     )
+
+
 
     chunk_counts = chunk["Label"].value_counts()
     print("Chunk labels:")

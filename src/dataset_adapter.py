@@ -15,6 +15,7 @@ def find_label_column(df):
 
 def normalize_label(value):
     value = str(value).strip().lower()
+
     if value in ["benign", "normal", "0"]:
         return "normal"
     return "attack"
@@ -22,6 +23,8 @@ def normalize_label(value):
 def adapt_dataset(input_file, output_file):
     print("ADAPTER STARTED")
     df = pd.read_csv(input_file, low_memory=False)
+
+    df = df.sample(frac=1, random_state=42).reset_index(drop=True)
 
     label_col = find_label_column(df)
 
