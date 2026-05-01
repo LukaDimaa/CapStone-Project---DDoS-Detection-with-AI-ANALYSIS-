@@ -4,7 +4,7 @@ LABEL_CANDIDATES = ["Label", "Class", "Attack", "Category", "target"]
 
 DROP_COLUMNS = [
     "Flow_ID", "Flow ID", "Src_IP", "Src IP",
-    "Dst_IP", "Dst IP", "Timestamp", "Unnamed: 0"
+    "Dst_IP", "Dst IP", "Timestamp", "Unnamed: 0", "Unnamed: 0.1"
 ]
 
 def find_label_column(df):
@@ -20,6 +20,7 @@ def normalize_label(value):
     return "attack"
 
 def adapt_dataset(input_file, output_file):
+    print("ADAPTER STARTED")
     df = pd.read_csv(input_file, low_memory=False)
 
     label_col = find_label_column(df)
@@ -42,8 +43,10 @@ def adapt_dataset(input_file, output_file):
     print("Saved adapted dataset:", output_file)
     print(df["Label"].value_counts())
 
-    if __name__ == "__main__":
-        import argparse
+if __name__ == "__main__":
+    import argparse
+
+    print("MAIN BLOCK RUNNING")
 
     parser = argparse.ArgumentParser(
         description="Universal dataset adapter for DDoS datasets"
@@ -63,5 +66,7 @@ def adapt_dataset(input_file, output_file):
 
     args = parser.parse_args()
 
-    adapt_dataset(args.input, args.output)
+    print("Input:", args.input)
+    print("Output:", args.output)
 
+    adapt_dataset(args.input, args.output)
