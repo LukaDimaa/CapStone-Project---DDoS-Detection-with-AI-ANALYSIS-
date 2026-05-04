@@ -83,6 +83,28 @@ def safe_output_name(input_file: str) -> str:
     return f"results_{base}_{timestamp}.csv"
 
 
+def classify_attack_type(row: pd.Series) -> str:
+    try:
+        if int(row.get("Prediction", 0)) == 0:
+            return "Normal"
+
+        protocol = int(float(row.get("Protocol", -1)))
+        syn_flags = float(row.get("SYN_Flag_Count", row.get("SYN Flag Count", 0)))
+        ack_flags = float(row.get("ACK_Flag_Count", row.get("ACK Flag Count", 0)))
+
+        if protocol == 17:
+            return "UDP Flood"
+        if protocol == 6 and syn_flags > ack_flags:
+            return "SYN Flood"
+        if protocol == 6:
+            return "TCP Flood"
+        if protocol == 1:
+            return "ICMP Flood"
+        return "General Attack"
+    except (TypeError, ValueError):
+        return "Unknown"
+
+
 def process_large_csv(
     file_path: str,
     model,
@@ -143,6 +165,7 @@ def process_large_csv(
         result_chunk["Prediction_Label"] = result_chunk["Prediction"].map(
             {0: "normal", 1: "attack"}
         )
+        result_chunk["Attack_Type"] = result_chunk.apply(classify_attack_type, axis=1)
 
         chunk_attack = int((result_chunk["Prediction"] == 1).sum())
         chunk_normal = int((result_chunk["Prediction"] == 0).sum())
@@ -166,7 +189,7 @@ def process_large_csv(
             )
             wrote_header = True
         except Exception as exc:
-            print(f"⚠️ Could not write results for chunk {processed_chunks}: {exc}")
+            print(f" Could not write results for chunk {processed_chunks}: {exc}")
             final_output = None
 
     return total_rows, total_normal, total_attack, final_output
