@@ -36,6 +36,43 @@ Output detection summary and verdict
 Export results to CSV
 
 
+--- Terminal Usage ---
+
+This project can be run with `make` from the project root.
+
+Install dependencies:
+
+```bash
+make install
+```
+
+Adapt a raw dataset:
+
+```bash
+make adapt
+```
+
+Train the model:
+
+```bash
+make train
+```
+
+Run detection:
+
+```bash
+make detect
+```
+
+Useful overrides:
+
+```bash
+make adapt RAW_INPUT=data/raw/custom.csv ADAPTED_OUTPUT=data/raw/custom_adapted.csv
+make detect DETECT_FILE=data/raw/custom_adapted.csv ROWS=50000 CHUNK_SIZE=10000
+make detect OUTPUT=results.csv
+```
+
+
 
 --- Features ---
 

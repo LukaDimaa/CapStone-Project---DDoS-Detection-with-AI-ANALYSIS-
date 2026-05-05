@@ -10,6 +10,13 @@ from sklearn.metrics import classification_report, accuracy_score, confusion_mat
 FILE_PATH = "data/raw/adapted_cic2019.csv"
 TARGET_PER_CLASS = 25000
 CHUNK_SIZE = 500000
+LABEL_COLUMNS = ["Label", "Class", "Attack", "Category", "target"]
+NORMAL_LABELS = {
+    "benign", "normal", "0", "non-attack", "non_attack", "legitimate"
+}
+ATTACK_LABELS = {
+    "attack", "1", "ddos", "dos", "drdos"
+}
 
 attack_chunks = []
 normal_chunks = []
@@ -20,6 +27,46 @@ normal_chunks = []
 attack_count = 0
 normal_count = 0
 chunk_index = 0
+
+
+def normalize_label(value):
+    value = str(value).strip().lower()
+
+    if value in NORMAL_LABELS:
+        return "normal"
+    if value in ATTACK_LABELS:
+        return "attack"
+    return "normal" if value == "benign" else "attack"
+
+
+def find_label_column(df: pd.DataFrame) -> str:
+    binary_candidates = []
+
+    for col in LABEL_COLUMNS:
+        if col not in df.columns:
+            continue
+
+        unique_values = {
+            str(value).strip().lower()
+            for value in df[col].dropna().unique()
+        }
+
+        if unique_values and unique_values.issubset(NORMAL_LABELS | ATTACK_LABELS):
+            binary_candidates.append(col)
+
+    if binary_candidates:
+        if "Class" in binary_candidates:
+            return "Class"
+        return binary_candidates[0]
+
+    if "Label" in df.columns:
+        return "Label"
+
+    for col in LABEL_COLUMNS:
+        if col in df.columns:
+            return col
+
+    raise ValueError("No label column found in training data.")
 
 full_df = pd.read_csv(FILE_PATH, low_memory=False)
 full_df = full_df.sample(frac=1, random_state=42).reset_index(drop=True)
@@ -42,9 +89,14 @@ for start in range(0, len(full_df), CHUNK_SIZE):
     chunk.replace([np.inf, -np.inf], 0, inplace=True)
     chunk.fillna(0, inplace=True)
 
-    chunk["Label"] = chunk["Label"].apply(
-        lambda x: "normal" if str(x).strip().lower() == "normal" else "attack"
-    )
+    source_label_column = find_label_column(chunk)
+    chunk["Label"] = chunk[source_label_column].apply(normalize_label)
+
+    extra_label_columns = [
+        col for col in LABEL_COLUMNS if col in chunk.columns and col != "Label"
+    ]
+    if extra_label_columns:
+        chunk.drop(columns=extra_label_columns, inplace=True, errors="ignore")
 
 
 
@@ -85,7 +137,8 @@ print("\nBalanced dataset:")
 print(df["Label"].value_counts())
 print("Shape:", df.shape)
 
-X = df.drop("Label", axis=1)
+feature_drop_columns = [col for col in LABEL_COLUMNS if col in df.columns]
+X = df.drop(columns=feature_drop_columns, errors="ignore")
 y = df["Label"].map({"normal": 0, "attack": 1})
 
 feature_columns = X.columns.tolist()

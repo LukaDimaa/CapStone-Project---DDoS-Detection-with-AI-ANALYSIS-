@@ -5,8 +5,10 @@ OUTPUT = "data/raw/cic2019_preprocessed.csv"
 
 df = pd.read_csv(INPUT, low_memory=False)
 
-df["Label"] = df["Class"].apply(
-    lambda x: "normal" if str(x).strip().lower() == "benign" else "attack"
+source_column = "Class" if "Class" in df.columns else "Label"
+
+df["Label"] = df[source_column].apply(
+    lambda x: "normal" if str(x).strip().lower() in {"benign", "normal", "0"} else "attack"
 )
 
 df.drop(columns=["Class", "Unnamed: 0"], inplace=True, errors="ignore")
