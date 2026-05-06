@@ -8,7 +8,7 @@ CHUNK_SIZE ?= 5000
 OUTPUT ?=
 VERBOSE ?= 1
 
-.PHONY: help install adapt train detect clean-results
+.PHONY: help install adapt train detect all clean-results
 
 help:
 	@echo "Available targets:"
@@ -16,6 +16,7 @@ help:
 	@echo "  make adapt                            Adapt RAW_INPUT into ADAPTED_OUTPUT"
 	@echo "  make train                            Train the model using src/train_model.py"
 	@echo "  make detect                           Run detection on DETECT_FILE"
+	@echo "  make all                              Run adapt, train, and detect in sequence"
 	@echo "  make clean-results                    Remove generated results_*.csv files"
 	@echo ""
 	@echo "Overridable variables:"
@@ -45,6 +46,8 @@ train:
 
 detect:
 	$(PYTHON) src/detect.py --file "$(DETECT_FILE)" $(if $(ROWS),--rows $(ROWS),) --chunk-size $(CHUNK_SIZE) $(if $(OUTPUT),--output "$(OUTPUT)",) $(if $(filter 1 true TRUE yes YES,$(VERBOSE)),--verbose,)
+
+all: adapt train detect
 
 clean-results:
 	rm -f results_*.csv

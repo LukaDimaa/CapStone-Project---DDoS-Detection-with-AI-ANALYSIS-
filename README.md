@@ -35,6 +35,12 @@ Output detection summary and verdict
 
 Export results to CSV
 
+Detection output now includes:
+
+- traffic ratios for normal vs attack rows
+- a simple terminal risk meter
+- an attack-type breakdown for detected malicious traffic
+
 
 --- Terminal Usage ---
 
@@ -64,12 +70,28 @@ Run detection:
 make detect
 ```
 
+Run the full pipeline:
+
+```bash
+make all
+```
+
 Useful overrides:
 
 ```bash
 make adapt RAW_INPUT=data/raw/custom.csv ADAPTED_OUTPUT=data/raw/custom_adapted.csv
 make detect DETECT_FILE=data/raw/custom_adapted.csv ROWS=50000 CHUNK_SIZE=10000
 make detect OUTPUT=results.csv
+```
+
+You can also use the shell wrapper:
+
+```bash
+chmod +x run.sh
+./run.sh adapt
+./run.sh train
+./run.sh detect
+./run.sh all
 ```
 
 

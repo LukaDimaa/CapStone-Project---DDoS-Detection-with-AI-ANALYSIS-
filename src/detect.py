@@ -12,6 +12,27 @@ MODEL_PATH = "models/ddos_model.pkl"
 FEATURES_PATH = "models/feature_columns.pkl"
 
 
+def format_percent(part: int, total: int) -> str:
+    if total == 0:
+        return "0.00%"
+    return f"{(part / total) * 100:.2f}%"
+
+
+def render_bar(part: int, total: int, width: int = 28) -> str:
+    if total <= 0:
+        return "[" + ("-" * width) + "]"
+
+    filled = round((part / total) * width)
+    filled = max(0, min(width, filled))
+    return "[" + ("#" * filled) + ("-" * (width - filled)) + "]"
+
+
+def print_section(title: str, width: int = 70) -> None:
+    print("\n" + "-" * width)
+    print(title)
+    print("-" * width)
+
+
 def print_banner() -> None:
     print("=" * 128)
     print(r"""
@@ -113,7 +134,7 @@ def process_large_csv(
     row_limit: int | None,
     output_file: str | None,
     verbose: bool,
-) -> tuple[int, int, int, str | None]:
+) -> tuple[int, int, int, str | None, dict[str, int]]:
     if not os.path.exists(file_path):
         print(f" Input file not found: {file_path}")
         sys.exit(2)
@@ -124,6 +145,7 @@ def process_large_csv(
     processed_chunks = 0
     rows_remaining = row_limit
     wrote_header = False
+    attack_type_totals: dict[str, int] = {}
 
     final_output = output_file
 
@@ -166,6 +188,13 @@ def process_large_csv(
             {0: "normal", 1: "attack"}
         )
         result_chunk["Attack_Type"] = result_chunk.apply(classify_attack_type, axis=1)
+        chunk_type_counts = (
+            result_chunk.loc[result_chunk["Prediction"] == 1, "Attack_Type"]
+            .value_counts()
+            .to_dict()
+        )
+        for attack_type, count in chunk_type_counts.items():
+            attack_type_totals[attack_type] = attack_type_totals.get(attack_type, 0) + int(count)
 
         chunk_attack = int((result_chunk["Prediction"] == 1).sum())
         chunk_normal = int((result_chunk["Prediction"] == 0).sum())
@@ -192,7 +221,7 @@ def process_large_csv(
             print(f" Could not write results for chunk {processed_chunks}: {exc}")
             final_output = None
 
-    return total_rows, total_normal, total_attack, final_output
+    return total_rows, total_normal, total_attack, final_output, attack_type_totals
 
 
 def print_summary(
@@ -201,35 +230,56 @@ def print_summary(
     total_normal: int,
     total_attack: int,
     output_file: str | None,
+    attack_type_totals: dict[str, int],
 ) -> str:
-    normal_percent = (total_normal / total_rows * 100) if total_rows else 0
-    attack_percent = (total_attack / total_rows * 100) if total_rows else 0
+    normal_percent = format_percent(total_normal, total_rows)
+    attack_percent = format_percent(total_attack, total_rows)
     verdict = classify_traffic(total_attack, total_rows)
+    severity_map = {
+        "NO DATA": 0,
+        "NORMAL": 1,
+        "LOW RISK": 2,
+        "SUSPICIOUS": 3,
+        "ATTACK DETECTED": 4,
+    }
+    severity = severity_map.get(verdict, 0)
+    severity_bar = ("!" * severity) + ("." * (4 - severity))
 
-    print("\n" + "-" * 70)
-    print("Detection Summary")
-    print("-" * 70)
-    print(f"Input file   : {input_file}")
-    print(f"Total rows   : {total_rows}")
-    print(f"Normal rows  : {total_normal}")
-    print(f"Attack rows  : {total_attack}")
-    print(f"Normal %     : {normal_percent:.2f}%")
-    print(f"Attack %     : {attack_percent:.2f}%")
-    print(f"Verdict      : {verdict}")
+    print_section("Detection Summary")
+    print(f"Input file     : {input_file}")
+    print(f"Total rows     : {total_rows}")
+    print(f"Normal traffic : {total_normal:<10} {normal_percent:>8}  {render_bar(total_normal, total_rows)}")
+    print(f"Attack traffic : {total_attack:<10} {attack_percent:>8}  {render_bar(total_attack, total_rows)}")
+    print(f"Verdict        : {verdict}")
+    print(f"Risk meter     : [{severity_bar}]")
 
     if verdict == "NORMAL":
         print("\nTraffic appears normal.")
     elif verdict == "LOW RISK":
-        print("\n Low amount of suspicious traffic detected.")
+        print("\nLow amount of suspicious traffic detected.")
     elif verdict == "SUSPICIOUS":
-        print("\n Suspicious traffic pattern detected.")
+        print("\nSuspicious traffic pattern detected.")
     elif verdict == "ATTACK DETECTED":
-        print("\n Potential DDoS attack detected.")
+        print("\nPotential DDoS attack detected.")
     else:
-        print("\nℹ No usable data found.")
+        print("\nNo usable data found.")
+
+    if attack_type_totals:
+        print_section("Attack Type Breakdown")
+        sorted_types = sorted(
+            attack_type_totals.items(),
+            key=lambda item: item[1],
+            reverse=True
+        )
+        for attack_type, count in sorted_types:
+            print(
+                f"{attack_type:<18} {count:<10} "
+                f"{format_percent(count, total_attack):>8}  "
+                f"{render_bar(count, total_attack)}"
+            )
 
     if output_file:
-        print(f"\n Results saved to: {output_file}")
+        print(f"\nResults saved to: {output_file}")
 
     return verdict
 
@@ -285,7 +335,7 @@ def main() -> None:
     if args.rows is not None:
         print(f" Row limit : {args.rows}")
 
-    total_rows, total_normal, total_attack, output_file = process_large_csv(
+    total_rows, total_normal, total_attack, output_file, attack_type_totals = process_large_csv(
         file_path=args.file,
         model=model,
         feature_columns=feature_columns,
@@ -301,6 +351,7 @@ def main() -> None:
         total_normal=total_normal,
         total_attack=total_attack,
         output_file=output_file,
+        attack_type_totals=attack_type_totals,
     )
 
     if verdict == "NORMAL":
